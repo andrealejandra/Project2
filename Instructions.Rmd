@@ -35,7 +35,12 @@ library(tidyverse)
 
 ### General Instructions
 
-Your project will be completed in a single Rmd file called index.Rmd. Clone the following repository, which contains the instructions and template: https://github.com/nathanielwoodward/project2.git
+Your project will be completed in a single Rmd file called index.Rmd. Clone the following repository, which contains the instructions and template, into your home directory: https://github.com/nathanielwoodward/project2.git
+
+```{bash, eval=F}
+cd ~
+git clone https://github.com/nathanielwoodward/project2.git
+```
 
 When you have finished your project, save all changes and make sure the project knits to HTML correctly.
 
@@ -57,6 +62,7 @@ Again, you can use data from anywhere you want (see bottom for resources)! If yo
 - **0. Introduction (5 pts)** 
 
     - Introduce your dataset and each of your variables (or just your main variables if you have lots) in a paragraph. Where did you find the data? What are each of the variables measuring? How many observations are there? How many of observations are there per group for your categorical/binary variable(s)?
+    
 
 - **1. Clustering (30 pts)** 
 
@@ -130,7 +136,7 @@ git remote set-url origin https://github.com/YOUR_USERNAME/project1.git
 git push origin main
 ```
 
-    - Once it is up there, go to your remote repository and then to Settings > Options and scroll down to GitHub pages. Alternately, go to 
+- Once it is up there, go to your remote repository and then to Settings > Options and scroll down to GitHub pages. Alternately, go to 
 https://github.com/YOUR_USERNAME/project2/settings/pages. 
 
     - Then, select the main branch and click save. Finally, go back to your homepage repository, go to the Portfolio.Rmd page, and update the link for project2 to YOUR_USERNAME.github.io/project2. Add, commit, and push your updated homepage to GitHub for deployment.

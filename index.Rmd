@@ -1,0 +1,138 @@
+---
+title: 'Project 2: Data Mining, Classification, Prediction'
+author: "SDS322E"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+
+class_diag <- function(score, truth, positive, cutoff=.5){
+
+  pred <- factor(score>cutoff,levels=c("TRUE","FALSE"))
+  truth <- factor(truth==positive, levels=c("TRUE","FALSE"))
+
+  tab<-table(truth, pred)
+  acc=sum(diag(tab))/sum(tab)
+  sens=tab[1,1]/rowSums(tab)[1]
+  spec=tab[2,2]/rowSums(tab)[2]
+  ppv=tab[1,1]/colSums(tab)[1]
+
+#CALCULATE F1
+  f1=2*(sens*ppv)/(sens+ppv)
+  
+#CALCULATE EXACT AUC
+  truth<-as.numeric(truth=="TRUE")
+  ord<-order(score, decreasing=TRUE)
+  score <- score[ord]; truth <- truth[ord]
+  TPR=cumsum(truth)/max(1,sum(truth))
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  dup<-c(score[-1]>=score[-length(score)], FALSE)
+  TPR<-c(0,TPR[!dup],1); FPR<-c(0,FPR[!dup],1)
+  n <- length(TPR)
+  auc<- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+  round(data.frame(acc,sens,spec,ppv,f1,ba=(sens+spec)/2,auc, row.names = "Metrics"),4)
+}
+```
+
+# Mining, Classification, Prediction
+
+## Name and EID here
+
+### Introduction 
+
+Paragraph or two introducing your datasets and variables, why they are interesting to you, etc. See instructions for more information
+
+```{R}
+library(tidyverse)
+# read your datasets in here, e.g., with read_csv()
+
+# if your dataset needs tidying, do so here
+
+# any other code here
+```
+
+### Cluster Analysis
+
+```{R}
+library(cluster)
+# clustering code here
+```
+
+Discussion of clustering here
+    
+    
+### Dimensionality Reduction with PCA
+
+```{R}
+# PCA code here
+```
+
+Discussions of PCA here. 
+
+###  Linear Classifier
+
+```{R}
+# linear classifier code here
+```
+
+```{R}
+# cross-validation of linear classifier here
+```
+
+Discussion here
+
+### Non-Parametric Classifier
+
+```{R}
+library(caret)
+# non-parametric classifier code here
+```
+
+```{R}
+# cross-validation of np classifier here
+```
+
+Discussion
+
+
+### Regression/Numeric Prediction
+
+```{R}
+# regression model code here
+```
+
+```{R}
+# cross-validation of regression model here
+```
+
+Discussion
+
+### Python 
+
+```{R}
+library(reticulate)
+```
+
+```{python}
+# python code here
+```
+
+Discussion
+
+### Concluding Remarks
+
+Include concluding remarks here, if any
+
+
+
+

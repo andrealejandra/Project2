@@ -46,19 +46,18 @@ class_diag <- function(score, truth, positive, cutoff=.5){
 
 # Mining, Classification, Prediction
 
-## Name and EID here
+## Andrea Virgen AAV782
 
 ### Introduction 
 
-Paragraph or two introducing your datasets and variables, why they are interesting to you, etc. See instructions for more information
+This dataset is a collection of personal information collected from an Oura ring, which is a wearable bio tracker that collects data on sleep, heart rate, breathing rate, body temperature, and activity. Oura software uses this information to calculate scores that are meant to inform the user of their sleep quality and how it effects their other bio metrics. This ring was worn daily for 221 days.
 
 ```{R}
 library(tidyverse)
-# read your datasets in here, e.g., with read_csv()
+library(readr)
 
-# if your dataset needs tidying, do so here
+biotrends <- read_csv("~/HW SDS 322E/project2/oura_2020-12-05_2021-12-05_trends.csv")
 
-# any other code here
 ```
 
 ### Cluster Analysis

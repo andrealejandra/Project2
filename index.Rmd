@@ -52,19 +52,68 @@ class_diag <- function(score, truth, positive, cutoff=.5){
 
 This dataset is a collection of personal information collected from an Oura ring, which is a wearable bio tracker that collects data on sleep, heart rate, breathing rate, body temperature, and activity. Oura software uses this information to calculate scores that are meant to inform the user of their sleep quality and how it effects their other bio metrics. This ring was worn daily for 221 days.
 
+how many observations per categorical group?
+
 ```{R}
 library(tidyverse)
 library(readr)
 
 biotrends <- read_csv("~/HW SDS 322E/project2/oura_2020-12-05_2021-12-05_trends.csv")
 
+#remove scores, NA values, and days with non-wear time
+biotrends %>%
+  select(-c(2:9,20:22,28:34,48:56)) %>%
+  na.omit() %>%
+  filter(`Non-wear Time`== 0) -> biotrends
+
+# col 5 == Temp deviation
+biotrends %>%
+  select(c(3,4,10,14:16,20,28)) -> bioanalysis
+
+#create binary var
+bioanalysis %>%
+  mutate(`Temperature` = ifelse(`Temperature Deviation (°C)`>0, "Increase", "Decrease")) %>%
+  select(-5) -> bioanalysis
 ```
 
 ### Cluster Analysis
 
 ```{R}
 library(cluster)
-# clustering code here
+library(GGally)
+
+# steps for pam
+
+# 3. Use only numerics (euclidean) or incorporate categoricals (gower)
+# 6. Interpret clusters
+# 7. Discuss goodness-of-fit
+
+#scale variables
+bio_scale <- data.frame(scale(bioanalysis))
+
+# calculate silhouette width and pick # of clusters
+sil_width<-vector()
+for(i in 2:10){
+  pam_fit <- pam(bio_scale, k = i)  
+  sil_width[i] <- pam_fit$silinfo$avg.width
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+# pam w/ 3 clusters
+bio_scale %>%
+  pam(k=3) -> bio_pam
+
+#results of pam
+bio_pam
+
+plot(bio_pam,which=2)
+# visualize clusters in ggpairs
+bio_scale %>%
+  mutate(cluster=as.factor(bio_pam$clustering)) %>%
+  ggpairs(columns = c(1:7), aes(color=cluster))
+
+# pick another variable for prediction
+## include categorical var with gower dissimilarity ***
 ```
 
 Discussion of clustering here
@@ -73,7 +122,35 @@ Discussion of clustering here
 ### Dimensionality Reduction with PCA
 
 ```{R}
-# PCA code here
+# PCA steps
+# 1. Understand the concepts behind PCA
+# 2. See/appreciate a bit of the math behind PCA
+# 3. Carry out PCA in R
+# 4. Assess how many PCs are needed
+# 5. Interpret PCs and describe an observation with a high/low score
+# 6. Use PC scores in further analyses.
+
+
+# eig1<- bio %>% cor %>% eigen()
+# eig1$vectors
+
+# conduct pca with scaled data
+bio_pca <- princomp(bio_scale)
+summary(bio_pca, loadings=T)
+
+# save eigen values and varience proportion for scree plot
+eigval<-bio_pca$sdev^2
+varprop=round(eigval/sum(eigval), 2)
+
+# can compare these two and only keep PCs where eigval > 1
+# eigval for each PC shows the correlation for each variable across the PC axis
+eigval
+varprop
+
+ggplot() + geom_bar(aes(y=varprop, x=1:7), stat="identity") + xlab("") + geom_path() +
+  geom_text(aes(x=1:7, y=varprop, label=round(varprop, 2)), vjust=1, col="white")+
+  scale_y_continuous(breaks=seq(0, .6, .2), labels = scales::percent) + 
+  scale_x_continuous(breaks=1:10)
 ```
 
 Discussions of PCA here. 
@@ -81,7 +158,9 @@ Discussions of PCA here.
 ###  Linear Classifier
 
 ```{R}
-# linear classifier code here
+fit <- glm(Temperature ~ , data=bioanalysis, family="binomial")
+
+class_diag(score,truth=bioanalysis$Temperature, positive="Increase")
 ```
 
 ```{R}

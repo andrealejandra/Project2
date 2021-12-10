@@ -66,14 +66,14 @@ biotrends %>%
   na.omit() %>%
   filter(`Non-wear Time`== 0) -> biotrends
 
-# col 5 == Temp deviation
 biotrends %>%
-  select(c(3,4,10,14:16,20,28)) -> bioanalysis
+  select(c(4:5,10,14:16,20,28)) -> bioanalysis
 
 #create binary var
 bioanalysis %>%
   mutate(`Temperature` = ifelse(`Temperature Deviation (°C)`>0, "Increase", "Decrease")) %>%
   select(-5) -> bioanalysis
+
 ```
 
 ### Cluster Analysis
@@ -87,9 +87,10 @@ library(GGally)
 # 3. Use only numerics (euclidean) or incorporate categoricals (gower)
 # 6. Interpret clusters
 # 7. Discuss goodness-of-fit
-
+bioanalysis %>%
+  select_if(is.numeric) -> bio_num
 #scale variables
-bio_scale <- data.frame(scale(bioanalysis))
+bio_scale <- data.frame(scale(bio_num))
 
 # calculate silhouette width and pick # of clusters
 sil_width<-vector()
@@ -158,14 +159,45 @@ Discussions of PCA here.
 ###  Linear Classifier
 
 ```{R}
-fit <- glm(Temperature ~ , data=bioanalysis, family="binomial")
+# may not need this
+bioanalysis %>%
+  mutate(Temp = ifelse(Temperature == "Increase", 1, 0)) -> bio_glm
 
-class_diag(score,truth=bioanalysis$Temperature, positive="Increase")
+# fit linear model to temperature calculated by vars
+fit <- glm(Temp ~ `REM Sleep Time` + `Awake Time` + `Sleep Latency` + `Average HRV` + `Respiratory Rate` + `Steps` + `Average MET`, data=bio_glm, family="binomial")
+
+# prediction scores for each Temperature calculated from vars
+score <- predict(fit, type="response")
+
+# compute scores for glm
+class_diag(score,truth=bio_glm$Temp, positive= 1)
+
+# confusion matrix
+# increases are more likely to be predicted by this model
+table(truth = bioanalysis$Temperature, prediction = score>.5)
 ```
 
 ```{R}
-# cross-validation of linear classifier here
+# cross-validation of linear classifier here w/ folds
+k=10 #choose number of folds
+data<-bio_glm[sample(nrow(bio_glm)),] #randomly order rows
+folds<-cut(seq(1:nrow(bio_glm)),breaks=k,labels=F) #create 10 folds
+diags<-NULL
+for(i in 1:k){
+  ## Create training and test sets
+  train<-data[folds==i,] 
+  test<-data[folds==i,]
+  truth<-test$Temp
+  ## Train model on training set
+  fit<-glm(Temp~(.)^2,data=train,family="binomial")
+  probs<-predict(fit,newdata = test,type="response")
+  ## Test model on test set (save all k results)
+  diags<-rbind(diags,class_diag(probs,truth, positive=1))
+}
+
+summarize_all(diags,mean)
 ```
+
 
 Discussion here
 

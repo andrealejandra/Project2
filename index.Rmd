@@ -50,9 +50,10 @@ class_diag <- function(score, truth, positive, cutoff=.5){
 
 ### Introduction 
 
-This dataset is a collection of personal information collected from an Oura ring, which is a wearable bio tracker that collects data on sleep, heart rate, breathing rate, body temperature, and activity. Oura software uses this information to calculate scores that are meant to inform the user of their sleep quality and how it effects their other bio metrics. This ring was worn daily for 221 days.
+This dataset is a collection of personal information collected from an Oura ring, which is a wearable bio tracker that collects data on sleep, heart rate, breathing rate, body temperature, and activity. Oura software uses this information to calculate scores that are meant to inform the user of their sleep quality and how it effects their other bio metrics. This ring was worn daily for 221 days. 
 
-how many observations per categorical group?
+I will use various methods to predict whether a standard deviation is above or below the mean categorized by Increase and Decrease, respectively. There are 73 observations above the mean temperature and 103 observations below the mean.
+
 
 ```{R}
 library(tidyverse)
@@ -74,6 +75,8 @@ bioanalysis %>%
   mutate(`Temperature` = ifelse(`Temperature Deviation (°C)`>0, "Increase", "Decrease")) %>%
   select(-5) -> bioanalysis
 
+table(bioanalysis$Temperature)
+
 ```
 
 ### Cluster Analysis
@@ -82,11 +85,7 @@ bioanalysis %>%
 library(cluster)
 library(GGally)
 
-# steps for pam
-
-# 3. Use only numerics (euclidean) or incorporate categoricals (gower)
-# 6. Interpret clusters
-# 7. Discuss goodness-of-fit
+# create subset of just numeric variables
 bioanalysis %>%
   select_if(is.numeric) -> bio_num
 #scale variables
@@ -102,7 +101,7 @@ ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1
 
 # pam w/ 3 clusters
 bio_scale %>%
-  pam(k=3) -> bio_pam
+  pam(k=2) -> bio_pam
 
 #results of pam
 bio_pam
@@ -113,24 +112,18 @@ bio_scale %>%
   mutate(cluster=as.factor(bio_pam$clustering)) %>%
   ggpairs(columns = c(1:7), aes(color=cluster))
 
-# pick another variable for prediction
-## include categorical var with gower dissimilarity ***
 ```
+To determine the amount of clusters that is most reasonable for my dataset, I plotted silhouette widths for amount of clusters ranging from 2 to 10. The largest width was for 2 clusters with an average width of .19, but this does not reflect any significant structure within the dataset. The medoids were partitioned around data point 65 for cluster 1 and data point 103
 
-Discussion of clustering here
+Red and blue clusters(1 and 2, respectively) show the most distinction in variables Awake Time and REM Sleep Time. Cluster 1 encompasses lower Awake Time and REM Sleep Values as well as lowest Average HRV(Heart Rate Variability) values. Steps and Average MET have the strongest positive correlation in both clusters, and this is expected because steps are a form of physical expenditure. Average MET is the average metabolic equivalent where one MET would mean an individual is only expending enough metabolic energy to fuel their basal metabolic processes. Cluster 2(blue) shows the next strongest correlation and shows a negative relationship between Sleep Latency and REM Sleep Time. This is reasonable considering increased Sleep Latency should allow more opportunity for REM Sleep Time, and this finding is bolstered by the the third strongest positive correlation between Sleep Latency and Awake Time in cluster 2.
+
+There were a few unexpected correlations: Average HRV showed a small positive correlation with Sleep Latency in cluster 2, Average MET and Awake Time were slightly negatively correlated in cluster 1, Respiratory Rate and Sleep Latency showed a slight negative correlation in cluster 2, and Respiratory Rate and Average HRV showed another slight negative correlation in cluster 2.
+
     
     
 ### Dimensionality Reduction with PCA
 
 ```{R}
-# PCA steps
-# 1. Understand the concepts behind PCA
-# 2. See/appreciate a bit of the math behind PCA
-# 3. Carry out PCA in R
-# 4. Assess how many PCs are needed
-# 5. Interpret PCs and describe an observation with a high/low score
-# 6. Use PC scores in further analyses.
-
 
 # eig1<- bio %>% cor %>% eigen()
 # eig1$vectors
@@ -153,8 +146,11 @@ ggplot() + geom_bar(aes(y=varprop, x=1:7), stat="identity") + xlab("") + geom_pa
   scale_y_continuous(breaks=seq(0, .6, .2), labels = scales::percent) + 
   scale_x_continuous(breaks=1:10)
 ```
+In my PCA analysis of the numerical variables in my dataset, the scree plot was not helpful in trying to determine which Principle Components should be kept. I decided to look at PC 1-3 because they all have a Standard Deviation above 1 and account of a cumulative proportion of 70.2% of the variance across the 7 scaled, numeric variables. I decided to leave out the extra ~17% cumulative proportion accounted for in PC 4 because the limited interpretation accounting for only an extra ~14% of variance seemed unnecessary.
 
-Discussions of PCA here. 
+PC 1 showed the strongest negative correlations in the variables Steps and Average MET at approximately -.61 each. This PC also showed a negative correlation of -.31 in Average HRV(Heart Rate Variability).
+
+PC2 showed the most positive relationships out of the 3 Principle Components.
 
 ###  Linear Classifier
 
@@ -241,7 +237,7 @@ Discussion
 
 ### Concluding Remarks
 
-Include concluding remarks here, if any
+I would like to conduct a follow-up analysis with a full year's worth of data to see if the insights change with more data points. Adding another categorical variable that measures self-perceived wellness would be another interesting facet to add and potentially predict. I would hypothesize a self-rated feeling from 1-5 would show an increased likelihood of temperature deviation above the norm, negative correlation with lowered sleep latency, and postive correlation with Average Heart Rate Variability.
 
 
 

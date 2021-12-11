@@ -124,7 +124,7 @@ There were a few unexpected correlations: Average HRV showed a small positive co
 ### Dimensionality Reduction with PCA
 
 ```{R}
-
+library(factoextra)
 # eig1<- bio %>% cor %>% eigen()
 # eig1$vectors
 
@@ -146,7 +146,8 @@ ggplot() + geom_bar(aes(y=varprop, x=1:7), stat="identity") + xlab("") + geom_pa
   scale_y_continuous(breaks=seq(0, .6, .2), labels = scales::percent) + 
   scale_x_continuous(breaks=1:10)
 
-#fviz_pca()
+
+fviz_pca_biplot(bio_pca)
 ```
 In my PCA analysis of the numerical variables in my dataset, the scree plot was not helpful in trying to determine which Principle Components should be kept. I decided to look at PC 1-3 because they all have a Standard Deviation above 1 and account of a cumulative proportion of 70.2% of the variance across the 7 scaled, numeric variables. I decided to leave out the extra ~17% cumulative proportion accounted for in PC 4 because the limited interpretation accounting for only an extra ~14% of variance seemed unnecessary.
 
@@ -255,7 +256,7 @@ for(i in 1:k){
 mean(diags)
 ```
 
-Discussion
+Using the numerical value of Temperature Deviation gave a 
 
 ### Python 
 

@@ -1,6 +1,6 @@
 ---
 title: 'Project 2: Data Mining, Classification, Prediction'
-author: "SDS322E"
+author: "Andrea Virgen"
 date: ''
 output:
   html_document:
@@ -46,7 +46,7 @@ class_diag <- function(score, truth, positive, cutoff=.5){
 
 # Mining, Classification, Prediction
 
-## Andrea Virgen AAV782
+## Andrea Virgen
 
 ### Introduction 
 

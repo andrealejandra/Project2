@@ -1,6 +1,6 @@
 ---
-title: 'Project 2: Data Mining, Classification, Prediction'
-author: "SDS322E"
+title: 'Data Mining, Classification, Prediction'
+author: "Andrea Virgen"
 date: ''
 output:
   html_document:
@@ -44,22 +44,23 @@ class_diag <- function(score, truth, positive, cutoff=.5){
 }
 ```
 
-# Mining, Classification, Prediction
+# Oura Ring Biodata Analysis
 
-## Andrea Virgen AAV782
 
 ### Introduction 
 
-This dataset is a collection of personal information collected from an Oura ring, which is a wearable bio tracker that collects data on sleep, heart rate, breathing rate, body temperature, and activity. Oura software uses this information to calculate scores that are meant to inform the user of their sleep quality and how it effects their other bio metrics. This ring was worn daily for 221 days. 
+This dataset is a collection of health data from one individual measured with an Oura Ring over the course of 221 days. This wearable bio tracker collects a breadth of data: sleep, heart rate, breathing rate, body temperature, and physical activity. Oura software uses this information to calculate scores meant to inform the user of their sleep quality and its influence over other bio metrics. [https://ouraring.com/blog]
 
-The categorical variable Temperature consists of the standard deviation above or below mean Temperature categorized by Increase and Decrease, respectively. There are 73 observations above the mean temperature and 103 observations below the mean.
+My intention is to explore how and if fluctuations in temperature readings can be predicted by lifestyle choices and/or biometrics.
+Temperature readings are stored as standard deviations in Oura software, so I have categorized data points as either Increase or Decrease dependent on their orientation to the mean: there are 73 observations above and 103 observations below.
 
 
 ```{R}
 library(tidyverse)
 library(readr)
+library(readxl)
 
-biotrends <- read_csv("~/HW SDS 322E/project2/oura_2020-12-05_2021-12-05_trends.csv")
+biotrends <- read_csv("/Users/andi/Desktop/PORTFOLIO/Project2/oura_2020-12-05_2021-12-05_trends.csv")
 
 #remove scores, NA values, and days with non-wear time
 biotrends %>%
@@ -256,21 +257,30 @@ for(i in 1:k){
 mean(diags)
 ```
 
-Using the numerical value of Temperature Deviation gave a 
+
 
 ### Python 
 
 ```{R}
-library(reticulate)
+# library(reticulate)
+# 
+# # create a new environment 
+# conda_create("r-reticulate")
+# 
+# # install SciPy
+# conda_install("r-reticulate", "pandas")
+# # indicate that we want to use a specific condaenv
+# use_condaenv("r-reticulate")
+# 
+# # import SciPy (will use "r-reticulate" as per call to use_condaenv)
+# pd <- import("pandas")
 ```
 
 ```{python}
-import pandas as pd
 
 
 ```
 
-Discussion
 
 ### Concluding Remarks
 
